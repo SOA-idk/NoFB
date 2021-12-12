@@ -14,6 +14,7 @@ module NoFB
                     css: 'style.css', js: 'confirm.js'
     plugin :halt
     plugin :flash
+    plugin :caching
     plugin :all_verbs # recognizes HTTP verbs beyond GET/POST (e.g., DELETE)
 
     use Rack::MethodOverride # for other HTTP verbs (with plugin all_verbs)
@@ -80,6 +81,8 @@ module NoFB
             end
 
             viewable_posts = View::Posts.new(group, posts)
+
+            response.expires 60, public: true
             view 'posts', locals: { posts: viewable_posts }
           end
         end

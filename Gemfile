@@ -16,6 +16,10 @@ gem 'roar', '~> 1.1'
 gem 'puma', '~> 5.5'
 gem 'roda', '~> 3.49'
 gem 'rack', '~> 2' # 2.3 will fix delegateclass bug
+gem 'redis'
+gem 'rack-cache'
+gem 'redis-rack-cache'
+
 # Controllers and services
 gem 'dry-monads', '~> 1.4'
 gem 'dry-transaction', '~> 0.13'

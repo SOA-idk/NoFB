@@ -70,3 +70,25 @@ namespace :quality do
     sh "flog -m #{only_app}"
   end
 end
+
+namespace :cache do
+  task :config do
+    require_relative 'config/environment.rb'
+    require_relative 'app/infrastructure/cache/init.rb'
+    @api = NoFB::Api
+  end
+
+  namespace :list do
+    task :dev do
+    end
+    task :production => :config do
+    end
+  end
+  
+  namespace :wipe do
+    task :dev do
+    end
+    task :production => :config do
+    end
+  end
+end

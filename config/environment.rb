@@ -4,6 +4,8 @@ require 'roda'
 require 'yaml'
 require 'figaro'
 require 'delegate' # flash due to bug in rack < 2.3.0
+require 'rack/cache'
+require 'redis-rack-cache'
 
 module NoFB
   # Configuration for the App
@@ -23,6 +25,13 @@ module NoFB
 
       configure :development, :test, :app_test do
         require 'pry'; # for breakpoints
+      end
+
+      configure :production do
+        ues Rack::Cache,
+            verbose: true,
+            metastore: "#{config.REDISCLOUD_URL}/0/metastore",
+            entitystore: "#{config.REDISCLOUD_URL}/0/entitystore"
       end
     end
   end
