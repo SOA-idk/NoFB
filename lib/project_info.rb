@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'http'
 require 'yaml'
 
@@ -7,7 +9,8 @@ def fb_api_path(group_id, config)
   "https://graph.facebook.com/#{group_id}?access_token=#{config}"
 end
 
-def call_fb_url(config, url)
+# :reek:UtilityFunction
+def call_fb_url(_config, url)
   # HTTP.headers(
   #   'Content-type' => 'application/json; charset=UTF-8',
   #   'Authorization' => "Token token=#{config['FB_TOKEN']}"
@@ -17,7 +20,6 @@ end
 
 fb_response = {}
 fb_results = {}
-
 
 # Happy project request
 project_url = fb_api_path('302165911402681/feed', config)

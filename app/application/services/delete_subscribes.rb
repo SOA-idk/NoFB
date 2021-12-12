@@ -8,18 +8,28 @@ module NoFB
     class DeleteSubscriptions
       include Dry::Transaction
 
-      step :create_query
+      step :call_detele
+      step :reify_subscribe
 
       private
 
-      def create_query(input)
-        query = Database::SubscribesOrm[input]
-        unless query.nil?
-          query.delete
-          Success("#{input[:user_id]}/#{input[:group_id]}")
-        end
+      # :reek:UncommunicativeVariableName
+      # :reek:TooManyStatements
+      def call_detele(input)
+        result = Gateway::Api.new(NoFB::App.config)
+                             .delete_subscribes(input)
+        result.success? ? Success(result.payload) : Failure(result.message)
+      rescue StandardError => e
+        puts "#{e.inspect}\\n#{e.backtrace}"
+        Failure('Cannot delete subscribe right now; please try again later')
+      end
+
+      def reify_subscribe(subscribe_json)
+        Representer::SubscribesList.new(OpenStruct.new)
+                                   .from_json(subscribe_json)
+                                   .then { |subscribe| Success(subscribe) }
       rescue StandardError
-        Failure('Having trouble accessing Database')
+        Failure('Error in the subscribe -- please try again')
       end
     end
   end

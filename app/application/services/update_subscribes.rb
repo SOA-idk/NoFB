@@ -8,19 +8,28 @@ module NoFB
     class UpdateSubscription
       include Dry::Transaction
 
-      step :update_query
+      step :call_update
+      step :reify_subscribe
 
       private
 
-      def update_query(input)
-        sub = Entity::Subscribes.new(user_id: input[:user_id],
-                                     group_id: input[:group_id],
-                                     word: input[:word])
-        Repository::For.klass(Entity::Subscribes)
-                       .db_update_or_create(sub)
-        Success('Successfully update subscribed words !')
+      # :reek:UncommunicativeVariableName
+      # :reek:TooManyStatements
+      def call_update(input)
+        result = Gateway::Api.new(NoFB::App.config)
+                             .update_subscribes(input)
+        result.success? ? Success(result.payload) : Failure(result.message)
+      rescue StandardError => e
+        puts "#{e.inspect}\\n#{e.backtrace}"
+        Failure('Cannot update subscribe right now; please try again later')
+      end
+
+      def reify_subscribe(subscribe_json)
+        Representer::SubscribesList.new(OpenStruct.new)
+                                   .from_json(subscribe_json)
+                                   .then { |subscribe| Success(subscribe) }
       rescue StandardError
-        Failure('Having trouble accessing Database')
+        Failure('Error in the subscribe -- please try again')
       end
     end
   end

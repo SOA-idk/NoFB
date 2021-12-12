@@ -6,7 +6,7 @@ module NoFB
   module Forms
     # dealing with routing params
     class NewSubscription < Dry::Validation::Contract
-      URL_REGEX = %r{(http[s]?)\:\/\/(www.)?facebook\.com}
+      URL_REGEX = %r{(https?)://(www.)?facebook\.com}
 
       params do
         required(:fb_url).filled(:string)

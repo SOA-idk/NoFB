@@ -79,3 +79,15 @@ rake db:drop
 | user_id | user_email | access_token |
 | ------- | ---------- | ------------ |
 | String  | String     | String       |
+
+
+## Cache
+- 60 sec. expired 
+![](https://i.imgur.com/tYxm2X0.png)
+- 700s ms without no cache
+![](https://i.imgur.com/wuthm9W.png)
+- 200s ms with cache
+![](https://i.imgur.com/19SlruU.png)
+
+## 12/12 quailty
+![](https://i.imgur.com/bpkeWC4.png)
