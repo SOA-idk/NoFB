@@ -18,10 +18,6 @@ module NoFB
 
     use Rack::MethodOverride # for other HTTP verbs (with plugin all_verbs)
 
-    # run in background
-    crawler = Value::WebCrawler.new # (headless: true)
-
-
     # rubocop:disable Metrics/BlockLength
     route do |routing|
       routing.assets # load CSS, JS
@@ -33,64 +29,6 @@ module NoFB
         view 'home' # , locals: { posts: posts }
       end
 
-      routing.on 'init' do
-        # posts = Repository::For.klass(Entity::Posts).all
-        Database::UsersOrm.find_or_create(user_id: '123',
-                                          user_email: 'hhoracehsu@@gmail.com',
-                                          user_name: '242234',
-                                          user_img: 'img test')
-
-        Database::GroupsOrm.find_or_create(group_id: '4534',
-                                           group_name: 'lalalala')
-
-        Database::GroupsOrm.find_or_create(group_id: '8787',
-                                           group_name: 'Idiot')
-
-        Database::SubscribesOrm.create(user_id: '123',
-                                       group_id: '4534',
-                                       word: 'cookies, sell')
-        Database::SubscribesOrm.create(user_id: '123',
-                                       group_id: '8787',
-                                       word: 'Bread')
-        view 'home'
-      end
-
-      routing.on 'testLogin' do
-        crawler.login
-        view 'show_browser'
-      end
-
-      routing.on 'testWait' do
-        crawler.wait_home_ready
-        view 'show_browser'
-      end
-
-      routing.on 'testDriver' do
-        crawler.test
-        view 'show_browser'
-      end
-
-      routing.on 'showBrowser' do
-        view 'show_browser'
-      end
-
-      routing.on 'goto_group_page_anyway' do
-        crawler.goto_group_page_anyway
-        view 'show_browser'
-      end
-
-      routing.on 'updateDB' do
-        crawler.crawl
-        puts crawler.construct_query
-        crawler.insert_db
-        # puts Database::PostsOrm.all
-        view 'show_browser'
-      end
-
-      routing.on 'testMail' do
-        Value::SendEmail.send_simple_message
-      end
-
       routing.on 'add' do
         routing.is do
           # GET /add/
@@ -100,8 +38,8 @@ module NoFB
           # POST /add/
           routing.post do
             # user_id = '123'
-            url_request = Forms::NewSubscription.new.call(routing.params)
-            subscription_made = Service::AddSubscriptions.new.call(url_request)
+            input = Forms::NewSubscription.new.call(routing.params)
+            subscription_made = Service::AddSubscriptions.new.call(input)
 
             if subscription_made.failure?
               flash[:error] = subscription_made.failure
@@ -117,18 +55,32 @@ module NoFB
         end
       end
 
+      # show the posts of the given group_id
       routing.on 'group' do
         routing.on String do |group_id|
-          puts "fb_token: #{App.config.FB_TOKEN}"
-          puts "last / group_id: #{group_id}\n"
+          # puts "fb_token: #{App.config.FB_TOKEN}"
+          # puts "last / group_id: #{group_id}\n"
           # GET /group/group_id
           routing.get do
-            # Get project from database
-            puts "rebuild / group_id: #{group_id}\n"
-            posts = Repository::For.klass(Entity::Posts)
-                                   .find_group_id(group_id.to_s)
+            result = Service::ShowPosts.new.call(group_id)
 
-            view 'posts', locals: { posts: posts }
+            if result.failure?
+              flash[:error] = result.failure
+              posts = nil
+            else
+              posts = result.value!
+            end
+
+            result_group = Service::ShowOneGroup.new.call(group_id)
+            if result_group.failure?
+              flash[:error] = result_group.failure
+              group = nil
+            else
+              group = result_group.value!
+            end
+
+            viewable_posts = View::Posts.new(group, posts)
+            view 'posts', locals: { posts: viewable_posts }
           end
         end
       end
@@ -138,12 +90,18 @@ module NoFB
         routing.is do
           # GET /user request
           routing.get do
-            groups = Repository::For.klass(Entity::Subscribes)
-                                    .find_all('123')
+            user_id = '123'
+            result = Service::ShowSubscriptions.new.call(user_id)
 
-            flash.now[:notice] = 'Start to subscribe to a word!!' if groups.none?
-
-            viewable_groups = View::GroupsList.new(groups, 'user')
+            if result.failure?
+              flash[:error] = result.failure
+              viewable_groups = View::GroupsList.new([], 'user')
+            else
+              group = result.value!
+              # puts group
+              flash.now[:notice] = 'Start to subscribe to a word!!' if group.none?
+              viewable_groups = View::GroupsList.new(group, 'user')
+            end
             view 'user', locals: { groups: viewable_groups }
           end
         end
@@ -169,9 +127,15 @@ module NoFB
           # GET /user/groupId
           routing.get do
             user_id = '123'
-            subscribes = Repository::For.klass(Entity::Subscribes)
-                                        .find_id(user_id, group_id)
-            viewable_subscribes = View::Subscribes.new(subscribes)
+            result = Service::ShowOneSubscribe.new.call(user_id: user_id, group_id: group_id)
+
+            if result.failure?
+              flash[:error] = result.failure
+              viewable_subscribes = View::Subscribes.new([])
+            else
+              subscribes = result.value!
+              viewable_subscribes = View::Subscribes.new(subscribes)
+            end
             view 'subscribe', locals: { subscribes: viewable_subscribes }
           end
 
