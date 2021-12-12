@@ -24,6 +24,14 @@ module NoFB
         @request.add_subscribes(input)
       end
 
+      def delete_subscribes(input)
+        @request.delete_subscribes(input)
+      end
+
+      def update_subscribes(input)
+        @request.update_subscribes(input)
+      end
+
       def posts_list
         @request.get_posts_list
       end
@@ -56,6 +64,19 @@ module NoFB
                    input)
         end
 
+        # :reek:FeatureEnvy
+        def delete_subscribes(input)
+          call_api('delete', ['subscribes', input[:user_id], input[:group_id]], 'access_key' => '123')
+        end
+
+        # :reek:FeatureEnvy
+        def update_subscribes(input)
+          call_api('patch',
+                   ['subscribes', input[:user_id], input[:group_id]],
+                   { 'access_key' => '123' },
+                   { subscribed_word: input[:word] })
+        end
+
         def get_posts_list
           call_api('get', ['posts'],
                    'access_key' => '123')
@@ -77,13 +98,18 @@ module NoFB
         # rubocop:disable Metrics/MethodLength
         # :reek:TooManyStatements
         # :reek:LongParameterList
+        # rubocop:disable Metrics/AbcSize
         def call_api(method, resources = [], params = {}, body = nil)
           api_path = resources.empty? ? @api_host : @api_root
           url = [api_path, resources].flatten.join('/') + params_str(params)
           puts "calling #{url}"
           header = HTTP.headers('Accept' => 'application/json')
-          if method == 'get'
+          case method
+          when 'get', 'delete'
             header.send(method, url)
+                  .then { |http_response| Response.new(http_response) }
+          when 'patch'
+            header.patch(url, form: body)
                   .then { |http_response| Response.new(http_response) }
           else # post
             header.post(url, form: body)
@@ -93,6 +119,7 @@ module NoFB
           raise "Invalid URL request: #{url}"
         end
         # rubocop:enable Metrics/MethodLength
+        # rubocop:enable Metrics/AbcSize
       end
       # rubocop:enable Naming/AccessorMethodName
 

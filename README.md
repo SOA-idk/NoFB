@@ -90,4 +90,4 @@ rake db:drop
 ![](https://i.imgur.com/19SlruU.png)
 
 ## 12/12 quailty
-![](https://i.imgur.com/9l6BOLS.png)
+![](https://i.imgur.com/bpkeWC4.png)
