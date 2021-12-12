@@ -7,6 +7,7 @@ require 'slim/include'
 module NoFB
   # Web App
   # rubocop:disable Metrics/ClassLength
+  # :reek:RepeatedConditional
   class App < Roda
     plugin :render, engine: 'slim', views: 'app/presentation/views_html'
     plugin :public, root: 'app/presentation/public'
@@ -65,6 +66,7 @@ module NoFB
           routing.get do
             result = Service::ShowPosts.new.call(group_id)
 
+            # :reek:RepeatedConditional
             if result.failure?
               flash[:error] = result.failure
               posts = nil

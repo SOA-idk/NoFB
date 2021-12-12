@@ -14,6 +14,7 @@ module NoFB
 
       private
 
+      # :reek:FeatureEnvy
       def validate_input(input)
         if input.success?
           Success(user_id: '123', fb_url: input[:fb_url], subscribed_word: input[:subscribed_word])
@@ -22,12 +23,14 @@ module NoFB
         end
       end
 
+      # :reek:UncommunicativeVariableName
+      # :reek:TooManyStatements
       def send_post(input)
         result = Gateway::Api.new(NoFB::App.config)
                              .add_subscribes(input)
         result.success? ? Success(result.payload) : Failure(result.message)
       rescue StandardError => e
-        puts e.inspect + '\n' + e.backtrace
+        puts "#{e.inspect}\\n#{e.backtrace}"
         Failure('Cannot add subscribe right now; please try again later')
       end
 

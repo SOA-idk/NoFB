@@ -88,3 +88,6 @@ rake db:drop
 ![](https://i.imgur.com/wuthm9W.png)
 - 200s ms with cache
 ![](https://i.imgur.com/19SlruU.png)
+
+## 12/12 quailty
+![](https://i.imgur.com/9l6BOLS.png)

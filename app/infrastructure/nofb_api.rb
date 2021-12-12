@@ -16,21 +16,6 @@ module NoFB
         @request.get_root.success?
       end
 
-      def projects_list(list)
-        @request.projects_list(list)
-      end
-
-      def add_project(owner_name, project_name)
-        @request.add_project(owner_name, project_name)
-      end
-
-      # Gets appraisal of a project folder rom API
-      # - req: ProjectRequestPath
-      #        with #owner_name, #project_name, #folder_name, #project_fullname
-      def appraise(req)
-        @request.get_appraisal(req)
-      end
-
       def subscription_list
         @request.get_subscription_list
       end
@@ -48,28 +33,15 @@ module NoFB
       end
 
       # HTTP request transmitter
+      # rubocop:disable Naming/AccessorMethodName
       class Request
         def initialize(config)
           @api_host = config.API_HOST
-          @api_root = "#{config.API_HOST}/api/v1"
+          @api_root = "#{@api_host}/api/v1"
         end
 
-        def get_root # rubocop:disable Naming/AccessorMethodName
+        def get_root
           call_api('get')
-        end
-
-        def projects_list(list)
-          call_api('get', ['projects'],
-                   'list' => Value::WatchedList.to_encoded(list))
-        end
-
-        def add_project(owner_name, project_name)
-          call_api('post', ['projects', owner_name, project_name])
-        end
-
-        def get_appraisal(req)
-          call_api('get', ['projects',
-                           req.owner_name, req.project_name, req.folder_name])
         end
 
         def get_subscription_list
@@ -96,30 +68,37 @@ module NoFB
 
         private
 
+        # :reek:UtilityFunction
         def params_str(params)
           params.map { |key, value| "#{key}=#{value}" }.join('&')
                 .then { |str| str ? "?#{str}" : '' }
         end
 
         # rubocop:disable Metrics/MethodLength
-        def call_api(method, resources = [], params = {}, body = nil) 
+        # :reek:TooManyStatements
+        # :reek:LongParameterList
+        def call_api(method, resources = [], params = {}, body = nil)
           api_path = resources.empty? ? @api_host : @api_root
           url = [api_path, resources].flatten.join('/') + params_str(params)
           puts "calling #{url}"
+          header = HTTP.headers('Accept' => 'application/json')
           if method == 'get'
-            HTTP.headers('Accept' => 'application/json').send(method, url)
-                .then { |http_response| Response.new(http_response) }
+            header.send(method, url)
+                  .then { |http_response| Response.new(http_response) }
           else # post
-            HTTP.headers('Accept' => 'application/json').post(url, form: body)
-                .then { |http_response| Response.new(http_response) }
+            header.post(url, form: body)
+                  .then { |http_response| Response.new(http_response) }
           end
         rescue StandardError
           raise "Invalid URL request: #{url}"
         end
+        # rubocop:enable Metrics/MethodLength
       end
+      # rubocop:enable Naming/AccessorMethodName
 
       # Decorates HTTP responses with success/error
       class Response < SimpleDelegator
+        # this is uesless descriptive comment
         NotFound = Class.new(StandardError)
 
         SUCCESS_CODES = (200..299)

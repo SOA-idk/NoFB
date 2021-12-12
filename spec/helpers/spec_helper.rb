@@ -23,6 +23,8 @@ CORRECT = YAML.safe_load(File.read('spec/fixtures/nofb_results.yml'))
 # CASSETTE_FILE = 'Nofb_api'
 
 # Helper method for acceptance tests
+
+# :reek:UtilityFunction
 def homepage
   NoFB::App.config.APP_HOST
 end

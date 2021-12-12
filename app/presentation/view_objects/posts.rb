@@ -2,6 +2,7 @@
 
 module View
   # consruct original posts entities
+  # :reek:TooManyInstanceVariables
   class Posts
     attr_reader :group_name, :group_id, :size, :post_list, :posts
 

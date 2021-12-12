@@ -5,6 +5,7 @@ require 'dry/transaction'
 module NoFB
   module Service
     # Show Posts
+    # :reek:InstanceVariableAssumption
     class ShowPosts
       include Dry::Transaction
 

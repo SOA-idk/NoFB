@@ -10,7 +10,7 @@ module NoFB
       include Roar::JSON
 
       property :user_id # , extend: Representer::User, class: OpenStruct
-      property :group_id #, extend: Representer::Group, class: OpenStruct
+      property :group_id # , extend: Representer::Group, class: OpenStruct
       property :word
     end
   end

@@ -12,6 +12,7 @@ module NoFB
 
       private
 
+      # :reek:FeatureEnvy
       def update_query(input)
         sub = Entity::Subscribes.new(user_id: input[:user_id],
                                      group_id: input[:group_id],

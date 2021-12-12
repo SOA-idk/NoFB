@@ -5,6 +5,7 @@ require 'dry/transaction'
 module NoFB
   module Service
     # Show Subscriptions
+    # :reek:InstanceVariableAssumption
     class ShowOneSubscribe
       include Dry::Transaction
 

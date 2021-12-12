@@ -5,6 +5,7 @@ require 'dry/transaction'
 module NoFB
   module Service
     # Show the group of given group_id
+    # :reek:InstanceVariableAssumption
     class ShowOneGroup
       include Dry::Transaction
 

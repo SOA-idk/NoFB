@@ -12,6 +12,7 @@ module NoFB
 
       private
 
+      # :reek:NilCheck
       def create_query(input)
         query = Database::SubscribesOrm[input]
         unless query.nil?
