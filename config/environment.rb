@@ -28,7 +28,7 @@ module NoFB
       end
 
       configure :production do
-        ues Rack::Cache,
+        use Rack::Cache,
             verbose: true,
             metastore: "#{config.REDISCLOUD_URL}/0/metastore",
             entitystore: "#{config.REDISCLOUD_URL}/0/entitystore"
