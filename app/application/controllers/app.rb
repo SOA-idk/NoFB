@@ -3,6 +3,7 @@
 require 'roda'
 require 'slim'
 require 'slim/include'
+require 'uri'
 
 module NoFB
   # Web App
@@ -29,6 +30,33 @@ module NoFB
       routing.root do
         session[:watching] ||= []
         view 'home' # , locals: { posts: posts }
+      end
+
+      routing.on 'login' do
+        client_id = App.config.LINE_CLINET_ID
+        # redirect_uri = 'https://idk-nofb.herokuapp.com/callback'
+        redirect_uri = 'http://localhost:9292/callback'
+        state = SecureRandom.hex(10)
+        data = {
+          'response_type': 'code',
+          'client_id': client_id,
+          'redirect_uri': redirect_uri,
+          'scope': 'profile%20openid',
+          'state': state
+        }
+        query = URI.encode_www_form(data)
+        routing.redirect "https://access.line.me/oauth2/v2.1/authorize?#{query}"
+      end
+
+      routing.on 'callback' do
+        routing.get do
+          puts 'routing:'
+          puts routing.params
+          puts response['Header-Name']
+          # assert routing.head['referer'] == 'https://api.line.me/'
+          code = routing.params['code']
+          state = routing.params['state']
+        end
       end
 
       routing.on 'add' do
