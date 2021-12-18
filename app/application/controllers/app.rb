@@ -34,8 +34,8 @@ module NoFB
 
       routing.on 'login' do
         client_id = App.config.LINE_CLINET_ID
-        # redirect_uri = 'https://idk-nofb.herokuapp.com/callback'
-        redirect_uri = 'http://localhost:9292/callback'
+        redirect_uri = 'https://idk-nofb.herokuapp.com/callback'
+        # redirect_uri = 'http://localhost:9292/callback'
         state = SecureRandom.hex(10)
         data = {
           'response_type': 'code',
