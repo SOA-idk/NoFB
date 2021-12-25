@@ -82,6 +82,7 @@ GEM
     http-form_data (2.3.0)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
+    jwt (2.3.0)
     kwalify (0.7.2)
     listen (3.7.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -190,6 +191,7 @@ DEPENDENCIES
   flog
   headless (~> 2.3)
   http (~> 5.0)
+  jwt
   minitest (~> 5.0)
   minitest-rg (~> 5.0)
   multi_json (~> 1.15)

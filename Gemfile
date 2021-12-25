@@ -15,6 +15,7 @@ gem 'roar', '~> 1.1'
 # APPLICATION LAYER
 # Web Application
 gem 'uri'
+gem 'jwt'
 gem 'puma', '~> 5.5'
 gem 'roda', '~> 3.49'
 gem 'rack', '~> 2' # 2.3 will fix delegateclass bug

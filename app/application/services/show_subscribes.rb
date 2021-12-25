@@ -11,7 +11,7 @@ module NoFB
 
       step :get_all_subscription
       step :reify_list
-      step :extract_specific_user
+      # step :extract_specific_user
 
       private
 
@@ -22,7 +22,7 @@ module NoFB
       def get_all_subscription(user_id)
         save_input(user_id)
         Gateway::Api.new(NoFB::App.config)
-                    .subscription_list
+                    .find_subscribes(user_id)
                     .then do |result|
                       result.success? ? Success(result.payload) : Failure(result.message)
                     end
@@ -38,15 +38,15 @@ module NoFB
         Failure('Could not parse response from API')
       end
 
-      def extract_specific_user(subscriptions)
-        # puts @user_id
-        results = subscriptions.subscribes.map do |subscription|
-          subscription if subscription.user_id == @user_id
-        end
-        Success(results)
-      rescue StandardError
-        Failure('Having trouble of extracting the user')
-      end
+      # def extract_specific_user(subscriptions)
+      #   # puts @user_id
+      #   results = subscriptions.subscribes.map do |subscription|
+      #     subscription if subscription.user_id == @user_id
+      #   end
+      #   Success(results)
+      # rescue StandardError
+      #   Failure('Having trouble of extracting the user')
+      # end
     end
   end
 end

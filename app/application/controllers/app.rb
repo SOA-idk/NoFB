@@ -33,29 +33,47 @@ module NoFB
       end
 
       routing.on 'login' do
-        client_id = App.config.LINE_CLINET_ID
-        redirect_uri = 'https://idk-nofb.herokuapp.com/callback'
-        # redirect_uri = 'http://localhost:9292/callback'
+        client_id = App.config.LINE_CLIENT_ID
+        # redirect_uri = 'https://idk-nofb.herokuapp.com/callback'
+        redirect_uri = App.config.LINE_REDIRECT_URI
         state = SecureRandom.hex(10)
         data = {
-          'response_type': 'code',
-          'client_id': client_id,
-          'redirect_uri': redirect_uri,
-          'scope': 'profile%20openid',
-          'state': state
+          response_type: 'code',
+          client_id: client_id,
+          redirect_uri: redirect_uri,
+          scope: 'profile openid',
+          state: state
         }
-        query = URI.encode_www_form(data)
+        query = URI.encode_www_form(data).gsub('+', '%20')
         routing.redirect "https://access.line.me/oauth2/v2.1/authorize?#{query}"
       end
 
       routing.on 'callback' do
         routing.get do
-          puts 'routing:'
           puts routing.params
-          puts response['Header-Name']
           # assert routing.head['referer'] == 'https://api.line.me/'
-          code = routing.params['code']
-          state = routing.params['state']
+          input = Forms::NewToken.new.call(routing.params)
+          user_info = Service::GetToken.new.call(input)
+
+          # check whether user is in database already
+          user = Service::FindUser.new.call(user_info.value!)
+
+          # the user is not in db
+          if user.failure?
+            # puts 'user is not in db'
+            # puts user
+            # puts ''
+            # puts 'user_info:'
+            # puts user_info
+            new_user = Service::AddUser.new.call(user_info.value!)
+            # puts "there is new user #{new_user} \n"
+            user = new_user
+            # session[:watching].insert(0, "#{user.user_id}").uniq!
+            # flash[:notice] = "Hi, #{new_user.value!.user_name}"
+            # routing.redirect "user/#{new_user.value!.user_id}"
+          end
+          flash[:notice] = "Hi, #{user.value!.user_name}"
+          routing.redirect "user/#{user.value!.user_id}"
         end
       end
 
@@ -68,6 +86,8 @@ module NoFB
           # POST /add/
           routing.post do
             # user_id = '123'
+            puts 'app routing param'
+            puts routing.params
             input = Forms::NewSubscription.new.call(routing.params)
             subscription_made = Service::AddSubscriptions.new.call(input)
 
@@ -120,19 +140,20 @@ module NoFB
 
       routing.on 'user' do
         # /user request
-        routing.is do
+        routing.on String do |user_id|
           # GET /user request
           routing.get do
-            user_id = '123'
+            puts "routing on user_id: #{user_id}"
             result = Service::ShowSubscriptions.new.call(user_id)
-
+            puts 'result of show subscription'
+            puts result
             if result.failure?
               flash[:error] = result.failure
               viewable_groups = View::GroupsList.new([], 'user')
             else
               group = result.value!
               # puts group
-              flash.now[:notice] = 'Start to subscribe to a word!!' if group.none?
+              flash.now[:notice] = 'Start to subscribe to a word!!' if group.nil?
               viewable_groups = View::GroupsList.new(group, 'user')
             end
             view 'user', locals: { groups: viewable_groups }
@@ -140,26 +161,24 @@ module NoFB
         end
 
         # DELETE /user/groupId request
-        routing.on String do |group_id|
+        routing.on String, String do |user_id, group_id|
           routing.delete do
-            user_id = '123'
             delete_sub = Service::DeleteSubscriptions.new.call(group_id: group_id, user_id: user_id)
 
             if delete_sub.failure?
               flash[:error] = 'Having trouble accessing Database'
-              routing.redirect '/user'
+              routing.redirect "/user/#{user_id}"
             end
 
             delete_path = delete_sub.value!
             session[:watching].delete(delete_path)
             flash[:notice] = 'Successfully unsubscribe !'
 
-            routing.redirect '/user'
+            routing.redirect "/user/#{user_id}"
           end
 
           # GET /user/groupId
           routing.get do
-            user_id = '123'
             result = Service::ShowOneSubscribe.new.call(user_id: user_id, group_id: group_id)
 
             if result.failure?
@@ -174,7 +193,6 @@ module NoFB
 
           # UPDATE /user/groupId
           routing.patch do
-            user_id = '123'
             update_request = Forms::UpdateSubscription.new.call(routing.params)
             update_made = Service::UpdateSubscription.new.call(user_id: user_id,
                                                                group_id: group_id,
@@ -186,7 +204,7 @@ module NoFB
               flash[:notice] = 'Successfully update subscribed words !'
             end
 
-            routing.redirect '/user'
+            routing.redirect "/user/#{user_id}"
           end
         end
       end

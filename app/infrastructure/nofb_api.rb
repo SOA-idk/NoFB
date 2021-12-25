@@ -5,11 +5,19 @@ require 'http'
 
 module NoFB
   module Gateway
-    # Infrastructure to call CodePraise API
+    # Infrastructure to call NoFB API
     class Api
       def initialize(config)
         @config = config
         @request = Request.new(@config)
+      end
+
+      def add_user(input)
+        @request.add_user(input)
+      end
+
+      def find_user(input)
+        @request.find_user(input)
       end
 
       def alive?
@@ -18,6 +26,10 @@ module NoFB
 
       def subscription_list
         @request.get_subscription_list
+      end
+
+      def find_subscribes(input)
+        @request.find_subscribes(input)
       end
 
       def add_subscribes(input)
@@ -52,9 +64,22 @@ module NoFB
           call_api('get')
         end
 
+        def add_user(input)
+          call_api('post', ['users'],
+                  { 'access_key' => '123' }, input)
+        end
+
+        def find_user(input)
+          call_api('get', ['users', input[:user_id]], { 'access_key' => '123' })
+        end
+
         def get_subscription_list
           call_api('get', ['subscribes'],
                    'access_key' => '123')
+        end
+
+        def find_subscribes(input)
+          call_api('get', ['subscribes', input[:user_id]], { 'access_key' => '123' })
         end
 
         def add_subscribes(input)
