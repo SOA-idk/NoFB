@@ -74,7 +74,7 @@ module NoFB
             # flash[:notice] = "Hi, #{new_user.value!.user_name}"
             # routing.redirect "user/#{new_user.value!.user_id}"
           end
-          session[:user_id] = user.value!.user_id
+          session[:user_info] = user.value!
           flash[:notice] = "Hi, #{user.value!.user_name}"
           routing.redirect "user/#{user.value!.user_id}"
         end
@@ -84,24 +84,24 @@ module NoFB
         routing.is do
           # GET /add/
           routing.get do
-            routing.redirect '/' if session[:user_id].nil?
+            routing.redirect '/' if session[:user_info].user_id.nil?
             view 'add'
           end
           # POST /add/
           routing.post do
             input = Forms::NewSubscription.new.call(routing.params)
-            subscription_made = Service::AddSubscriptions.new.call(user_id: session[:user_id], data: input)
+            subscription_made = Service::AddSubscriptions.new.call(user_id: session[:user_info].user_id, data: input)
 
             if subscription_made.failure?
               flash[:error] = subscription_made.failure
-              routing.redirect "user/#{session[:user_id]}"
+              routing.redirect "user/#{session[:user_info].user_id}"
             end
 
             sub = subscription_made.value!
             session[:watching].insert(0, "#{sub.user_id}/#{sub.group_id}").uniq!
             flash[:notice] = 'Successfully subscribe to specific word(s).'
 
-            routing.redirect "user/#{session[:user_id]}"
+            routing.redirect "user/#{session[:user_info.user_id]}"
           end
         end
       end
@@ -142,18 +142,18 @@ module NoFB
       routing.on 'user' do
         # /user request
         routing.on String do |user_id|
-          # GET /user/user_id request
+          # GET /user/{user_id} request
           routing.is do
             routing.get do
               result = Service::ShowSubscriptions.new.call(user_id)
 
               if result.failure?
                 flash[:error] = result.failure
-                viewable_groups = View::GroupsList.new([], user_id)
+                viewable_groups = View::GroupsList.new([], session[:user_info])
               else
                 group = result.value!
                 flash.now[:notice] = 'Start to subscribe to a word!!' if group.nil?
-                viewable_groups = View::GroupsList.new(group[:subscribes], user_id)
+                viewable_groups = View::GroupsList.new(group[:subscribes], session[:user_info])
               end
               view 'user', locals: { groups: viewable_groups }
             end

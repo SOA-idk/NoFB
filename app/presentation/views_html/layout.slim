@@ -4,6 +4,7 @@ html
     title NoFB
     meta charset="utf-8"
     / Bootstrap CSS and theme (United Theme)
+    meta name="viewport" content="width=device-width, initial-scale=1"
     link{
       href="https://cdn.jsdelivr.net/npm/bootswatch@5.1.3/dist/cerulean/bootstrap.min.css"
       rel="stylesheet" integrity="sha384-6PpWmaLt7GOhVYBzVUBXgwhaV2S6iHthYodyuX2lCQlqAmt6RHXOh+wbLF6hunfO"
@@ -50,5 +51,12 @@ html
         include :flash_bar
         == yield
 
-      footer
-        = "NoFB is made for using fb group without notification. We can use NoFB to track what we interesting with immediately."
+    .container 
+      footer.py-3.my-4
+        ul.nav.justify-content-center.border-bottom.pb-3.mb-3
+          / li.nav-item
+          /   a.nav-link.px-2.text-muted href="#" Home
+          / li.nav-item
+          /   a.nav-link.px-2.text-muted href="https://github.com/SOA-idk/NoFB" Github
+        p.text-center.text-muted @2021 NoFB 
+        p.text-center.text-muted "NoFB is made for instant notification. We can use NoFB to track what we interesting with immediately."
