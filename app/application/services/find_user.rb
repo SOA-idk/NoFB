@@ -26,6 +26,8 @@ module NoFB
       def find_user(input)
         result = Gateway::Api.new(NoFB::App.config)
                              .find_user(input)
+        puts 'result of find user'
+        puts result
         result.success? ? Success(result.payload) : Failure(result.message)
       rescue StandardError => e
         puts "#{e.inspect}\\n#{e.backtrace}"

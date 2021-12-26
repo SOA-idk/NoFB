@@ -16,8 +16,9 @@ module NoFB
 
       # :reek:FeatureEnvy
       def validate_input(input)
-        if input.success?
-          Success(user_id: '123', fb_url: input[:fb_url], subscribed_word: input[:subscribed_word])
+        if input[:data].success?
+          Success(user_id: input[:user_id], fb_url: input[:data][:fb_url],
+                  subscribed_word: input[:data][:subscribed_word])
         else
           Failure("URL #{input.errors.messages.first}")
         end

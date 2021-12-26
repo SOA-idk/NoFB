@@ -127,7 +127,6 @@ module NoFB
         def call_api(method, resources = [], params = {}, body = nil)
           api_path = resources.empty? ? @api_host : @api_root
           url = [api_path, resources].flatten.join('/') + params_str(params)
-          puts "calling #{url}"
           header = HTTP.headers('Accept' => 'application/json')
           case method
           when 'get', 'delete'

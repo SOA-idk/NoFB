@@ -20,7 +20,7 @@ module View
     end
 
     def full_path
-      "/#{@user_id}/#{@group.group_id}"
+      "#{@user_id}/#{@group.group_id}"
     end
   end
 end

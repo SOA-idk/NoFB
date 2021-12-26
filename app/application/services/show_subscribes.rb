@@ -22,7 +22,7 @@ module NoFB
       def get_all_subscription(user_id)
         save_input(user_id)
         Gateway::Api.new(NoFB::App.config)
-                    .find_subscribes(user_id)
+                    .find_subscribes(user_id: user_id)
                     .then do |result|
                       result.success? ? Success(result.payload) : Failure(result.message)
                     end
