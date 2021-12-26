@@ -33,6 +33,8 @@ module NoFB
       end
 
       routing.on 'login' do
+        # if session user is already recorded
+        routing.redirect "user/#{session[:user_info].user_id}" unless session[:user_info].nil?
         client_id = App.config.LINE_CLIENT_ID
         redirect_uri = App.config.LINE_REDIRECT_URI
         state = SecureRandom.hex(10)
@@ -59,20 +61,12 @@ module NoFB
 
           # the user is not in db
           if user.failure?
-            # puts 'user is not in db'
-            # puts user.failure
-            # # puts ''
-            # puts 'user_info:'
-            # puts user_info
             new_user = Service::AddUser.new.call(user_info.value!)
             if new_user.failure?
               flash[:notice] = new_user.failure
               routing.redirect 'user/123'
             end
-            # puts "there is new user #{new_user} \n"
             user = new_user
-            # flash[:notice] = "Hi, #{new_user.value!.user_name}"
-            # routing.redirect "user/#{new_user.value!.user_id}"
           end
           session[:user_info] = user.value!
           flash[:notice] = "Hi, #{user.value!.user_name}"
