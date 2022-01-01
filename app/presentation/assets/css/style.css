@@ -62,12 +62,20 @@ h1 {
 }
 
 .query-bar {
-background-color: #EEEEEE;
-padding: 5px 5px 5px 5px;
+    background-color: #EEEEEE;
+    padding: 5px 5px 5px 5px;
 }
 
 footer {
     padding: 0.5in;
     font-size:11px;
     /* color:rgb(100, 100, 100); */
+}
+
+/* #login{
+    background-color: #06c755;
+} */
+
+#login:hover {
+    filter: brightness(90%);
 }

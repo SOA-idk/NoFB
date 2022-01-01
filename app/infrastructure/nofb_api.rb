@@ -20,6 +20,14 @@ module NoFB
         @request.find_user(input)
       end
 
+      def add_user_notify(input)
+        @request.add_user_notify(input)
+      end
+
+      def find_user_notify(input)
+        @request.find_user_notify(input)
+      end
+
       def alive?
         @request.get_root.success?
       end
@@ -66,7 +74,17 @@ module NoFB
 
         def add_user(input)
           call_api('post', ['users'],
-                  { 'access_key' => '123' }, input)
+                   { 'access_key' => '123' }, input)
+        end
+
+        def add_user_notify(input)
+          call_api('post', ['notify'],
+                   { 'access_key' => '123' }, input)
+        end
+
+        def find_user_notify(input)
+          call_api('get', ['notify', input[:user_id]],
+                   { 'access_key' => '123' })
         end
 
         def find_user(input)
@@ -128,6 +146,7 @@ module NoFB
           api_path = resources.empty? ? @api_host : @api_root
           url = [api_path, resources].flatten.join('/') + params_str(params)
           header = HTTP.headers('Accept' => 'application/json')
+          
           case method
           when 'get', 'delete'
             header.send(method, url)
@@ -159,11 +178,15 @@ module NoFB
         end
 
         def message
-          payload['message']
+          json['message']
         end
 
         def payload
           body.to_s
+        end
+
+        def json
+          JSON.parse(payload)
         end
       end
     end

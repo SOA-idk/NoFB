@@ -12,6 +12,7 @@ module View
     def initialize(groups, user_info)
       @user_name = user_info[:user_name]
       @user_img = user_info[:user_img]
+      @user_id = user_info[:user_id]
       @groups = groups.map.with_index { |group, index| Group.new(group, user_id, index) }
     end
 

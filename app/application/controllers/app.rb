@@ -49,28 +49,60 @@ module NoFB
         routing.redirect "https://access.line.me/oauth2/v2.1/authorize?#{query}"
       end
 
+      routing.on 'notify' do
+        # user open the notify choice
+        client_id = App.config.NOTIFY_CLIENT_ID
+        redirect_uri = App.config.NOTIFY_REDIRECT_URI
+        state = session[:user_info].user_id
+        data = {
+          response_type: 'code',
+          client_id: client_id,
+          redirect_uri: redirect_uri,
+          scope: 'notify',
+          state: state
+        }
+        query = URI.encode_www_form(data).gsub('+', '%20')
+        routing.redirect "https://notify-bot.line.me/oauth/authorize?#{query}"
+      end
+
       routing.on 'callback' do
-        routing.get do
-          puts routing.params
-          # assert routing.head['referer'] == 'https://api.line.me/'
-          input = Forms::NewToken.new.call(routing.params)
-          user_info = Service::GetToken.new.call(input)
+        # routing on /callback/auth - gain the line user access token
+        routing.on 'auth' do
+          routing.get do
+            puts routing.params
+            # assert routing.head['referer'] == 'https://api.line.me/'
+            input = Forms::NewToken.new.call(routing.params)
+            user_info = Service::GetToken.new.call(input)
 
-          # check whether user is in database already
-          user = Service::FindUser.new.call(user_info.value!)
+            # check whether user is in database already
+            user = Service::FindUser.new.call(user_info.value!)
 
-          # the user is not in db
-          if user.failure?
-            new_user = Service::AddUser.new.call(user_info.value!)
-            if new_user.failure?
-              flash[:notice] = new_user.failure
-              routing.redirect 'user/123'
+            # the user is not in db
+            if user.failure?
+              new_user = Service::AddUser.new.call(user_info.value!)
+              if new_user.failure?
+                flash[:notice] = new_user.failure
+                routing.redirect 'user/123'
+              end
+              user = new_user
             end
-            user = new_user
+            session[:user_info] = user.value!
+            flash[:notice] = "Hi, #{user.value!.user_name}"
+            routing.redirect "/user/#{user.value!.user_id}"
           end
-          session[:user_info] = user.value!
-          flash[:notice] = "Hi, #{user.value!.user_name}"
-          routing.redirect "user/#{user.value!.user_id}"
+        end
+
+        # routing on /callback/notify - gain the permission of line notify
+        routing.on 'notify' do
+          routing.get do
+            # check the routing params
+            input = Forms::NewToken.new.call(routing.params)
+            # get and store the access_token from line notify
+            notify_info = Service::StoreNotifyToken.new.call(input)
+
+            flash[:notice] = notify_info.failure? ? notify_info.failure : 'Successfully connect to LINE NOTIFY!'
+            routing.redirect "/user/#{session[:user_info].user_id}"
+          end
         end
       end
 
@@ -91,11 +123,15 @@ module NoFB
               routing.redirect "user/#{session[:user_info].user_id}"
             end
 
+            # Notify through line notify
+            notify_made = Service::NotifySubscriptions.new.call(user_id: session[:user_info].user_id, data: input)
+            puts 'notify user through line' if notify_made.success?
+
             sub = subscription_made.value!
             session[:watching].insert(0, "#{sub.user_id}/#{sub.group_id}").uniq!
             flash[:notice] = 'Successfully subscribe to specific word(s).'
 
-            routing.redirect "user/#{session[:user_info.user_id]}"
+            routing.redirect "user/#{session[:user_info].user_id}"
           end
         end
       end
@@ -176,7 +212,7 @@ module NoFB
               delete_sub = Service::DeleteSubscriptions.new.call(group_id: group_id, user_id: user_id)
 
               if delete_sub.failure?
-                flash[:error] = 'Having trouble accessing Database'
+                flash[:error] = delete_sub.failure
                 routing.redirect "/user/#{user_id}"
               end
 
@@ -195,7 +231,7 @@ module NoFB
                                                                 word: update_request[:subscribed_word])
 
               if update_made.failure?
-                flash[:error] = "Can't update the subscribed word!"
+                flash[:error] = update_made.failure
               else
                 flash[:notice] = 'Successfully update subscribed words !'
               end
