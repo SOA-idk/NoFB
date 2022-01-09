@@ -13,7 +13,7 @@ module NoFB
     plugin :render, engine: 'slim', views: 'app/presentation/views_html'
     plugin :public, root: 'app/presentation/public'
     plugin :assets, path: 'app/presentation/assets',
-                    css: ['style.css', 'switch_button.css'], js: 'confirm.js'
+                    css: ['style.css'], js: 'confirm.js'
     plugin :halt
     plugin :flash
     plugin :caching
@@ -190,6 +190,8 @@ module NoFB
               user_notify = user_token.failure? ? false : true
 
               result = Service::ShowSubscriptions.new.call(user_id)
+              puts result.failure?
+
 
               if result.failure?
                 flash.now[:error] = result.failure
