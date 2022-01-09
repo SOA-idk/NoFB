@@ -30,5 +30,9 @@ module View
     def group_url
       "https://www.facebook.com/groups/#{@group.group_id}"
     end
+
+    def group_value
+      "#{group_url}|#{group_name}"
+    end
   end
 end

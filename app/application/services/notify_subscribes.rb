@@ -22,7 +22,10 @@ module NoFB
       def validate_input(input)
         result = get_token(input)
         if input[:data].success? && result.success?
-          Success(user_id: input[:user_id], fb_url: input[:data][:fb_url],
+          fb_url = input[:data][:fb_url].split('|')[0]
+          group_name = input[:data][:fb_url].split('|')[1]
+          Success(user_id: input[:user_id], fb_url: fb_url,
+                  group_name: group_name,
                   subscribed_word: input[:data][:subscribed_word],
                   access_token: result.value!['user_access_token'])
         else
@@ -36,7 +39,7 @@ module NoFB
         header = { 'Authorization' => "Bearer #{input[:access_token]}",
                    'Content-Type' => 'application/x-www-form-urlencoded' }
         data = {
-          'message': "成功訂閱了 #{input[:subscribed_word]}，如果一有貼文，就會通知你唷!"
+          'message': "你成功訂閱了 [ #{input[:subscribed_word]} ], 如果 [ #{input[:group_name]} ] 一有貼文，就會通知你唷!\n\nSucessfully subscribed to word [ #{input[:subscribed_word]} ]. If there is new post about [ #{input[:subscribed_word]} ] in group [ #{input[:group_name]} ], We will notify you!!"
         }
         data = URI.encode_www_form(data)
 
