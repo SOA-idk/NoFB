@@ -11,7 +11,6 @@ module NoFB
 
       step :get_all_subscription
       step :reify_list
-      # step :extract_specific_user
 
       private
 
@@ -31,22 +30,20 @@ module NoFB
       end
 
       def reify_list(subscriptions_json)
-        Representer::SubscribesList.new(OpenStruct.new)
-                                   .from_json(subscriptions_json)
-                                   .then { |subscriptions| Success(subscriptions) }
+        sub_list = Representer::SubscribesList.new(OpenStruct.new)
+                                              .from_json(subscriptions_json)
+        # call Api to get group_name
+        sub_list['subscribes'].map do |sub|
+          group = Gateway::Api.new(NoFB::App.config)
+                              .group_name(group_id: sub['group_id'])
+                              .then { |result| result.success? ? result.payload : 'Error' }
+                              .then { |group_json| Representer::Group.new(OpenStruct.new).from_json(group_json) }
+          sub['group_name'] = group['group_name']
+        end
+        Success(sub_list)
       rescue StandardError
         Failure('Could not parse response from API')
       end
-
-      # def extract_specific_user(subscriptions)
-      #   # puts @user_id
-      #   results = subscriptions.subscribes.map do |subscription|
-      #     subscription if subscription.user_id == @user_id
-      #   end
-      #   Success(results)
-      # rescue StandardError
-      #   Failure('Having trouble of extracting the user')
-      # end
     end
   end
 end

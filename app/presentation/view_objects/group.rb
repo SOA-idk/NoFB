@@ -5,7 +5,7 @@ module View
   class Group
     attr_reader :index
 
-    def initialize(group, user_id, index = nil)
+    def initialize(group, user_id = nil, index = nil)
       @group = group
       @index = index
       @user_id = user_id
@@ -15,12 +15,20 @@ module View
       @group.group_id
     end
 
+    def group_name
+      @group.group_name
+    end
+
     def word
       @group.word
     end
 
     def full_path
       "#{@user_id}/#{@group.group_id}"
+    end
+
+    def group_url
+      "https://www.facebook.com/groups/#{@group.group_id}"
     end
   end
 end

@@ -5,9 +5,7 @@ require_relative 'group'
 module View
   # A list with lots of group which belong to same user
   class GroupsList
-    attr_reader :user_name
-    attr_reader :user_img
-    attr_reader :user_id
+    attr_reader :user_name, :user_img, :user_id
 
     def initialize(groups, user_info)
       @user_name = user_info[:user_name]

@@ -6,11 +6,16 @@
         img.img-fluid.rounded-circle.avatar.mx-auto.d-block src= groups.user_img
         p.text-center.fs-4.mt-2 type="text" = groups.user_name
         form.mb-5.text-center role="form" action="/notify" method='GET'
-          button {
-            class="btn btn-success" id="add" type="submit"
-          }
-            span Line notify
-          
+          - if user_notify
+            button {
+              class="btn btn-outline-success disabled" id="add" type="submit" disable="disabled"
+            }
+              span.bi.bi-check-circle  Line Notification
+          - else 
+            button {
+                class="btn btn-outline-danger" id="add" type="submit"
+            }
+              span.bi.bi-patch-exclamation  Line Notification
     .col-lg-4
   .row.justify-content-md-center
     .col-lg-8.text-center
@@ -18,14 +23,14 @@
         thead 
           tr
             th scope="col" #
-            th scope="col" GroupId 
+            th scope="col" Group Name
             th scope="col" Subscribed words
             th scope="col" Action 
         tbody 
           - groups.each do |group|
             tr
               th scope="row" = group.index
-              td = group.group_id
+              td = group.group_name
               td = group.word
               td 
                 .btn-group.pull-right

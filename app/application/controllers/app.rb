@@ -13,7 +13,7 @@ module NoFB
     plugin :render, engine: 'slim', views: 'app/presentation/views_html'
     plugin :public, root: 'app/presentation/public'
     plugin :assets, path: 'app/presentation/assets',
-                    css: 'style.css', js: 'confirm.js'
+                    css: ['style.css', 'switch_button.css'], js: 'confirm.js'
     plugin :halt
     plugin :flash
     plugin :caching
@@ -111,8 +111,18 @@ module NoFB
           # GET /add/
           routing.get do
             routing.redirect '/' if session[:user_info].user_id.nil?
-            view 'add'
+            groups_made = Service::ShowGroups.new.call
+
+            if groups_made.failure?
+              flash[:error] = groups_made.failure
+              routing.redirect "user/#{session[:user_info].user_id}"
+            end
+
+            groups = groups_made.value![:groups]
+            viewable_groups = View::AllowedGroups.new(groups)
+            view 'add', locals: { groups: viewable_groups }
           end
+
           # POST /add/
           routing.post do
             input = Forms::NewSubscription.new.call(routing.params)
@@ -175,24 +185,27 @@ module NoFB
           # GET /user/{user_id} request
           routing.is do
             routing.get do
+              # check whether the user is notify
+              user_token = Service::GetNotifyToken.new.call(user_id: user_id)
+              user_notify = user_token.failure? ? false : true
+
               result = Service::ShowSubscriptions.new.call(user_id)
 
               if result.failure?
-                flash[:error] = result.failure
+                flash.now[:error] = result.failure
                 viewable_groups = View::GroupsList.new([], session[:user_info])
               else
                 group = result.value!
                 flash.now[:notice] = 'Start to subscribe to a word!!' if group.nil?
                 viewable_groups = View::GroupsList.new(group[:subscribes], session[:user_info])
               end
-              view 'user', locals: { groups: viewable_groups }
+
+              view 'user', locals: { groups: viewable_groups, user_notify: user_notify }
             end
           end
 
           # GET /user/{user_id}/{group_id}
           routing.on String do |group_id|
-            puts 'routing on user/user_id/groupid'
-
             # GET /user/{user_id}/{group_id} request
             routing.get do
               result = Service::ShowOneSubscribe.new.call(user_id: user_id, group_id: group_id)

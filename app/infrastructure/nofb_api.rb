@@ -60,6 +60,10 @@ module NoFB
         @request.get_groups_list
       end
 
+      def group_name(input)
+        @request.get_group_name(input)
+      end
+
       # HTTP request transmitter
       # rubocop:disable Naming/AccessorMethodName
       class Request
@@ -74,60 +78,65 @@ module NoFB
 
         def add_user(input)
           call_api('post', ['users'],
-                   { 'access_key' => '123' }, input)
+                   { 'access_key' => App.config.ACCESS_KEY }, input)
         end
 
         def add_user_notify(input)
           call_api('post', ['notify'],
-                   { 'access_key' => '123' }, input)
+                   { 'access_key' => App.config.ACCESS_KEY }, input)
         end
 
         def find_user_notify(input)
           call_api('get', ['notify', input[:user_id]],
-                   { 'access_key' => '123' })
+                   { 'access_key' => App.config.ACCESS_KEY })
         end
 
         def find_user(input)
-          call_api('get', ['users', input[:user_id]], { 'access_key' => '123' })
+          call_api('get', ['users', input[:user_id]], { 'access_key' => App.config.ACCESS_KEY })
         end
 
         def get_subscription_list
           call_api('get', ['subscribes'],
-                   'access_key' => '123')
+                   'access_key' => App.config.ACCESS_KEY)
         end
 
         def find_subscribes(input)
-          call_api('get', ['subscribes', input[:user_id]], { 'access_key' => '123' })
+          call_api('get', ['subscribes', input[:user_id]], { 'access_key' => App.config.ACCESS_KEY })
         end
 
         def add_subscribes(input)
           call_api('post',
                    ['subscribes'],
-                   { 'access_key' => '123' },
+                   { 'access_key' => App.config.ACCESS_KEY },
                    input)
         end
 
         # :reek:FeatureEnvy
         def delete_subscribes(input)
-          call_api('delete', ['subscribes', input[:user_id], input[:group_id]], 'access_key' => '123')
+          call_api('delete', ['subscribes', input[:user_id], input[:group_id]], 'access_key' => App.config.ACCESS_KEY)
         end
 
         # :reek:FeatureEnvy
         def update_subscribes(input)
           call_api('patch',
                    ['subscribes', input[:user_id], input[:group_id]],
-                   { 'access_key' => '123' },
+                   { 'access_key' => App.config.ACCESS_KEY },
                    { subscribed_word: input[:word] })
         end
 
         def get_posts_list
           call_api('get', ['posts'],
-                   'access_key' => '123')
+                   'access_key' => App.config.ACCESS_KEY)
         end
 
         def get_groups_list
           call_api('get', ['groups'],
-                   'access_key' => '123')
+                   'access_key' => App.config.ACCESS_KEY)
+        end
+
+        def get_group_name(input)
+          call_api('get', ['groups', input[:group_id]],
+                   'access_key' => App.config.ACCESS_KEY)
         end
 
         private

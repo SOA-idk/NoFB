@@ -4,12 +4,9 @@
       .col-md-2.col-sm-3
         .text-right Group URL:
       .col-md-8.col-sm-6
-        input { 
-          type='text' name='fb_url'
-          id='fb_url_input' class="form-control"
-          placeholder="e.g. https://www.facebook.com/groups/302165911402681"
-        }
-    /   .col-md-2.col-sm-3
+        select class="form-select" aria-label=".form-select-lg example" name="fb_url" id="fb_url"
+          - groups.each do |group|
+            option value=group.group_url  = group.group_name
     .row
       .col-md-12.blank-row
     .row.vertical-align
