@@ -5,11 +5,27 @@ require 'http'
 
 module NoFB
   module Gateway
-    # Infrastructure to call CodePraise API
+    # Infrastructure to call NoFB API
     class Api
       def initialize(config)
         @config = config
         @request = Request.new(@config)
+      end
+
+      def add_user(input)
+        @request.add_user(input)
+      end
+
+      def find_user(input)
+        @request.find_user(input)
+      end
+
+      def add_user_notify(input)
+        @request.add_user_notify(input)
+      end
+
+      def find_user_notify(input)
+        @request.find_user_notify(input)
       end
 
       def alive?
@@ -18,6 +34,10 @@ module NoFB
 
       def subscription_list
         @request.get_subscription_list
+      end
+
+      def find_subscribes(input)
+        @request.find_subscribes(input)
       end
 
       def add_subscribes(input)
@@ -52,9 +72,32 @@ module NoFB
           call_api('get')
         end
 
+        def add_user(input)
+          call_api('post', ['users'],
+                   { 'access_key' => '123' }, input)
+        end
+
+        def add_user_notify(input)
+          call_api('post', ['notify'],
+                   { 'access_key' => '123' }, input)
+        end
+
+        def find_user_notify(input)
+          call_api('get', ['notify', input[:user_id]],
+                   { 'access_key' => '123' })
+        end
+
+        def find_user(input)
+          call_api('get', ['users', input[:user_id]], { 'access_key' => '123' })
+        end
+
         def get_subscription_list
           call_api('get', ['subscribes'],
                    'access_key' => '123')
+        end
+
+        def find_subscribes(input)
+          call_api('get', ['subscribes', input[:user_id]], { 'access_key' => '123' })
         end
 
         def add_subscribes(input)
@@ -102,8 +145,8 @@ module NoFB
         def call_api(method, resources = [], params = {}, body = nil)
           api_path = resources.empty? ? @api_host : @api_root
           url = [api_path, resources].flatten.join('/') + params_str(params)
-          puts "calling #{url}"
           header = HTTP.headers('Accept' => 'application/json')
+          
           case method
           when 'get', 'delete'
             header.send(method, url)
@@ -135,11 +178,15 @@ module NoFB
         end
 
         def message
-          payload['message']
+          json['message']
         end
 
         def payload
           body.to_s
+        end
+
+        def json
+          JSON.parse(payload)
         end
       end
     end

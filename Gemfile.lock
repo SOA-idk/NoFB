@@ -82,6 +82,7 @@ GEM
     http-form_data (2.3.0)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
+    jwt (2.3.0)
     kwalify (0.7.2)
     listen (3.7.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -169,6 +170,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.8)
+    uri (0.11.0)
     watir (7.1.0)
       regexp_parser (>= 1.2, < 3)
       selenium-webdriver (~> 4.0)
@@ -189,6 +191,7 @@ DEPENDENCIES
   flog
   headless (~> 2.3)
   http (~> 5.0)
+  jwt
   minitest (~> 5.0)
   minitest-rg (~> 5.0)
   multi_json (~> 1.15)
@@ -207,6 +210,7 @@ DEPENDENCIES
   rubocop
   simplecov (~> 0)
   slim (~> 4.1)
+  uri
   watir (~> 7.0)
   webdrivers (~> 5.0)
 

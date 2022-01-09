@@ -3,8 +3,14 @@
     .col-lg-4
     .col-lg-4
       .text-cetner
-        img.img-fluid.rounded-circle.avatar.mx-auto.d-block src="/images/woman.png"
-        input.mt-2.mb-5.form-control type="text" value = groups.user_id 
+        img.img-fluid.rounded-circle.avatar.mx-auto.d-block src= groups.user_img
+        p.text-center.fs-4.mt-2 type="text" = groups.user_name
+        form.mb-5.text-center role="form" action="/notify" method='GET'
+          button {
+            class="btn btn-success" id="add" type="submit"
+          }
+            span Line notify
+          
     .col-lg-4
   .row.justify-content-md-center
     .col-lg-8.text-center

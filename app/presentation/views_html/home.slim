@@ -1,9 +1,31 @@
 .p-5.mb-4.bg-light.rounded-3
   .container-fluid.py-5
-    form role="form" action="/user" method='GET' id='show-group-form'
+    form role="form" action="/login" method='GET' id='show-group-form'
       h1.display-5.fw-bold id='main_header' NoFB 
-      p.col-md-8.fs-4 id='description' This is description of NoFB!!!
+      p.col-md-8.fs-4 id='description' NoFB aims at helping users get instant notification for a specific word. We implement a website that you could subscribe to a specific word in a Facebook group. Then, when a new post is launched in the group, we would notify you simultaneously.
       button {
         class="btn btn-primary btn-lg" type='submit'
         value='submit' id='login'
-      } Log in with FB
+      } Log in with Line
+.container-fluid.py-5.border-bottom
+  .row.g-4.py-5.row-cols-1.row-cols-lg-3
+    .col.d-flex.align-items-start
+      .icon-square.text-dark.flex-shrink-0.me-3
+        i.bi.bi-person
+      .feature 
+        h2 LINE Account
+        p NoFB used LINE login plugin to make the connection with users. We would get user's avatar and name.
+        / a.btn.btn-primary href="#" 
+        /   Primary button 
+    .col.d-flex.align-items-start
+      .icon-square.text-dark.flex-shrink-0.me-3
+        i.bi.bi-bell
+      .feature 
+        h2 LINE Notify
+        p User need to grant the permission for NoFB to send notification. NoFB would notify you, when you subscribed to a new word or when a subscribed word is mentioned in the latest post.
+    .col.d-flex.align-items-start
+      .icon-square.text-dark.flex-shrink-0.me-3
+        i.bi.bi-file-word
+      .feature 
+        h2 Subscribe to a Word
+        p Go and subscribe to a word in a Facebook group. When the new subscribed word is mentioned, we will notify you!!
