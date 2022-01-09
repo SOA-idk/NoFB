@@ -79,3 +79,7 @@ footer {
 #login:hover {
     filter: brightness(90%);
 }
+
+i {
+    font-size: 3rem;
+}
